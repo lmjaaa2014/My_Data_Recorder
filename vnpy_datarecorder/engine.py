@@ -19,7 +19,6 @@ from vnpy.trader.utility import load_json, save_json, BarGenerator
 from vnpy.trader.database import BaseDatabase, get_database
 from vnpy_spreadtrading.base import EVENT_SPREAD_DATA, SpreadData
 
-
 APP_NAME: str = "DataRecorder"
 
 EVENT_RECORDER_LOG: str = "eRecorderLog"
@@ -54,13 +53,18 @@ class RecorderEngine(BaseEngine):
 
         self.database: BaseDatabase = get_database()
 
-        self.load_setting()
+    ##源码修改,支持按照账号存储数据
+    def engine_start(self, account_name: str):
+        self.load_setting(account_name)
         self.register_event()
         self.start()
         self.put_event()
 
-    def load_setting(self) -> None:
+
+    def load_setting(self, account_name: str) -> None:
         """"""
+        file_name = self.setting_filename.split(".")[0]
+        self.setting_filename = f"{file_name}_{account_name}.json"
         setting: dict = load_json(self.setting_filename)
         self.tick_recordings = setting.get("tick", {})
         self.bar_recordings = setting.get("bar", {})
